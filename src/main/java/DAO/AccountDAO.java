@@ -5,7 +5,6 @@ import Model.Account;
 import Util.ConnectionUtil;
 import java.sql.*;
 
-
 public class AccountDAO {
     
     public Account addAccount(Account account) {

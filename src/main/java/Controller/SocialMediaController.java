@@ -1,9 +1,17 @@
 package Controller;
 
+import java.util.List;
+
 import Service.AccountService;
+import Service.MessageService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import Model.Account;
+import Model.Message;
+import Service.MessageService;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
+
 
 
 /**
@@ -18,6 +26,8 @@ public class SocialMediaController {
      * @return a Javalin app object which defines the behavior of the Javalin controller.
      */
     private AccountService accountService = new AccountService();
+    private MessageService messageService = new MessageService();
+
 
     public Javalin startAPI() {
         Javalin app = Javalin.create();
@@ -25,6 +35,14 @@ public class SocialMediaController {
         
         app.post("/register", this::registerHandler);
         app.post("/login", this::loginHandler);
+
+        app.post("/messages", this::createMessageHandler);
+        app.delete("/messages/{message_id}", this::deleteMessageHandler);
+        app.get("/accounts/{account_id}/messages", this::getMessagesByUserHandler);
+        app.get("/messages", this::getAllMessageHandler);
+        app.get("/messages/{message_id}", this::getMessageByIdHandler);
+        app.patch("/messages/{message_id}", this::updateMessageHandler);
+
         return app;
     }
     /**
@@ -58,7 +76,59 @@ public class SocialMediaController {
         }
     }
 
-    
+    private void createMessageHandler(Context ctx) {
+        Message msg = ctx.bodyAsClass(Message.class);
+        Message posted = messageService.postMessage(msg);
+        if (posted != null) {
+            ctx.status(200).json(posted);
+        } else {
+            ctx.status(400);
+        }
+    }
 
+    private void deleteMessageHandler(Context context) {
+        int messageId = Integer.parseInt(context.pathParam("message_id"));
+        Message deleted = messageService.getMessageById(messageId);
+
+        if (deleted == null) {
+            context.status(200).json("");
+        } else {
+            messageService.deleteMessage(messageId);
+            context.status(200).json(deleted);
+        }
+    }
+
+    private void getAllMessageHandler (Context context) {
+        List<Message> messages = messageService.getAllMessages();
+        context.json(messages);
+    }
+    
+    private void getMessagesByUserHandler (Context context) {
+        int accountId = Integer.parseInt(context.pathParam("account_id"));
+        List<Message> messages = messageService.getMessagesByUser(accountId);
+        context.json(messages);
+    }
+
+    private void getMessageByIdHandler(Context ctx) {
+        int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+        Message message = messageService.getMessageById(messageId);
+        if (message != null) {
+            ctx.json(message);
+        } else {
+            ctx.status(404);
+        }
+    }
+
+    private void updateMessageHandler (Context context) {
+        int messageId = Integer.parseInt(context.pathParam("message_id"));
+        Message incoming = context.bodyAsClass(Message.class);
+
+        Message updated = messageService.updateMessage(messageId, incoming.getMessage_text());
+        if (updated !=null) {
+            context.status(200).json(updated);
+        } else {
+            context.status(400);
+        }
+    }
 
 }
