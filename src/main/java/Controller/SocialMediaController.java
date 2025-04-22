@@ -1,6 +1,7 @@
 package Controller;
 
 import java.util.List;
+import java.util.Map;
 
 import Service.AccountService;
 import Service.MessageService;
@@ -109,13 +110,13 @@ public class SocialMediaController {
         context.json(messages);
     }
 
-    private void getMessageByIdHandler(Context ctx) {
-        int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+    private void getMessageByIdHandler(Context context) {
+        int messageId = Integer.parseInt(context.pathParam("message_id"));
         Message message = messageService.getMessageById(messageId);
-        if (message != null) {
-            ctx.json(message);
-        } else {
-            ctx.status(404);
+        if (message !=null) {
+            context.json(message);
+        }else {
+            context.status(404);
         }
     }
 
