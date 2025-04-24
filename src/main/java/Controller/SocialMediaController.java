@@ -111,13 +111,18 @@ public class SocialMediaController {
     }
 
     private void getMessageByIdHandler(Context context) {
-        int messageId = Integer.parseInt(context.pathParam("message_id"));
-        Message message = messageService.getMessageById(messageId);
+        try {
+            int messageId = Integer.parseInt(context.pathParam("message_id"));
+            Message message = messageService.getMessageById(messageId);
         if (message !=null) {
             context.json(message);
         }else {
-            context.status(404);
+            context.status(200);
         }
+        } catch (NumberFormatException e) {
+            context.status(400);    
+        }
+        
     }
 
     private void updateMessageHandler (Context context) {
